@@ -30,8 +30,31 @@ $ composer require sf4/api-security
 
 ## Usage
 
-``` php
-
+config/packages/security.yaml
+``` yaml
+security:
+    encoders:
+        Sf4\ApiUser\Entity\User:
+            algorithm: argon2i
+    providers:
+        app_user_provider:
+            entity:
+                class: Sf4\ApiUser\Entity\User
+                property: email
+    firewalls:
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+        main:
+            anonymous: true
+            logout: ~
+            guard:
+                authenticators:
+                    - Sf4\ApiSecurity\Security\Authenticator\TokenAuthenticator
+    access_control:
+        - { path: ^/security, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/admin, roles: ROLE_ADMIN }
+        - { path: ^/user, roles: ROLE_USER }
 ```
 
 ## Testing
