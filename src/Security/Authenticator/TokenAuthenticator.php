@@ -8,7 +8,9 @@
 
 namespace Sf4\ApiSecurity\Security\Authenticator;
 
+use Doctrine\ORM\EntityManagerInterface;
 use Sf4\ApiSecurity\Entity\User;
+use Sf4\ApiSecurity\Repository\UserRepository;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -22,6 +24,13 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
 {
 
     const REQUEST_ATTRIBUTE = 'token';
+
+    protected $entityManager;
+
+    public function __construct(EntityManagerInterface $manager)
+    {
+        $this->entityManager = $manager;
+    }
 
     /**
      * Returns a response that directs the user to authenticate.
@@ -121,7 +130,9 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
             return null;
         }
 
-        return new User();
+        /** @var UserRepository $repository */
+        $repository = $this->entityManager->getRepository(User::class);
+        return $repository->getUserByToken($apiToken);
     }
 
     /**

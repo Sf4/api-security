@@ -40,16 +40,39 @@ return [
 ];
 ```
 
+config/services.yaml
+``` yaml
+services:
+    # ...
+    Sf4\ApiSecurity\Security\Authenticator\TokenAuthenticator: ~
+```
+
+config/packages/doctrine.yaml
+``` yaml
+doctrine:
+    # ...
+    orm:
+        # ...
+        mappings:
+            # ...
+            Sf4\ApiSecurity:
+                is_bundle: false
+                type: annotation
+                dir: '%kernel.project_dir%/vendor/sf4/api-security/src/Entity'
+                prefix: 'Sf4\ApiSecurity\Entity'
+                alias: Sf4\ApiSecurity
+```
+
 config/packages/security.yaml
 ``` yaml
 security:
     encoders:
-        Sf4\ApiUser\Entity\User:
+        Sf4\ApiSecurity\Entity\User:
             algorithm: argon2i
     providers:
         app_user_provider:
             entity:
-                class: Sf4\ApiUser\Entity\User
+                class: Sf4\ApiSecurity\Entity\User
                 property: email
     firewalls:
         dev:
