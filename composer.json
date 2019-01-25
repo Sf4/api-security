@@ -18,6 +18,7 @@
     ],
     "require": {
         "php": "~7.1",
+        "sf4/api-user": "^1.1",
         "symfony/security-bundle": "^4.2"
     },
     "require-dev": {
@@ -26,12 +27,12 @@
     },
     "autoload": {
         "psr-4": {
-            "sf4\\api-security\\": "src"
+            "Sf4\\ApiSecurity\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "sf4\\api-security\\": "tests"
+            "Sf4\\ApiSecurity\\": "tests"
         }
     },
     "scripts": {

@@ -30,6 +30,16 @@ $ composer require sf4/api-security
 
 ## Usage
 
+config/bundles.php
+``` php
+<?php
+
+return [
+    # ...
+    Symfony\Bundle\SecurityBundle\SecurityBundle::class => ['all' => true]
+];
+```
+
 config/packages/security.yaml
 ``` yaml
 security:
