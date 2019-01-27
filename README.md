@@ -80,6 +80,7 @@ security:
             security: false
         main:
             anonymous: true
+            stateless:  true
             logout: ~
             guard:
                 authenticators:
