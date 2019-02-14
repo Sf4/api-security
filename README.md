@@ -44,7 +44,11 @@ config/services.yaml
 ``` yaml
 services:
     # ...
-    Sf4\ApiSecurity\Security\Authenticator\TokenAuthenticator: ~
+    Sf4\ApiSecurity\EventSubscriber\RequestSubscriber: ~
+    Sf4\ApiSecurity\Security\Authenticator\TokenAuthenticator:
+            class: Sf4\ApiSecurity\Security\Authenticator\TokenAuthenticator
+            arguments:
+                -   '@Doctrine\ORM\EntityManagerInterface'
 ```
 
 config/packages/doctrine.yaml
