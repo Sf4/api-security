@@ -44,6 +44,20 @@ config/services.yaml
 ``` yaml
 services:
     # ...
+    
+    Sf4\Api\Repository\RepositoryFactory:
+        class: Sf4\Api\Repository\RepositoryFactory
+        arguments:
+            $entityManager: '@Doctrine\ORM\EntityManagerInterface'
+            $entities:
+#                user: Sf4\ApiUser\Entity\User
+#                user_detail: Sf4\ApiUser\Entity\UserDetail
+                user: Sf4\ApiSecurity\Entity\User
+                user_detail: Sf4\ApiSecurity\Entity\UserDetail
+                user_role: Sf4\ApiSecurity\Entity\UserRole
+                user_right: Sf4\ApiSecurity\Entity\UserRight
+                user_role_right: Sf4\ApiSecurity\Entity\UserRoleRight
+    # ...
     Sf4\ApiSecurity\EventSubscriber\RequestSubscriber: ~
     Sf4\ApiSecurity\Security\Authenticator\TokenAuthenticator:
             class: Sf4\ApiSecurity\Security\Authenticator\TokenAuthenticator
@@ -59,6 +73,12 @@ doctrine:
         # ...
         mappings:
             # ...
+#            Sf4\ApiUser:
+#                is_bundle: false
+#                type: annotation
+#                dir: '%kernel.project_dir%/vendor/sf4/api-user/src/Entity'
+#                prefix: 'Sf4\ApiUser\Entity'
+#                alias: Sf4\ApiUser
             Sf4\ApiSecurity:
                 is_bundle: false
                 type: annotation

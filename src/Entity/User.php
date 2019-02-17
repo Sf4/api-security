@@ -8,27 +8,30 @@
 
 namespace Sf4\ApiSecurity\Entity;
 
+use Sf4\Api\Entity\EntityInterface;
 use Sf4\ApiUser\Entity\Traits\UserTrait;
+use Sf4\ApiUser\Entity\UserFieldsInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass="Sf4\ApiSecurity\Repository\UserRepository")
- * @ORM\Table(indexes={
- *     @ORM\Index(name="email_idx", columns={"email"})
- * })
  */
-class User implements UserInterface
+class User implements EntityInterface, UserFieldsInterface, UserInterface, \Sf4\ApiUser\Entity\UserInterface
 {
-
     use UserTrait;
 
     /**
-     * @see UserInterface
+     * @ORM\ManyToOne(targetEntity="Sf4\ApiSecurity\Entity\UserDetail", cascade={"persist"})
+     */
+    protected $userDetail;
+
+    /**
+     * @see UserInterface6
      */
     public function getSalt()
     {
-
+        return 'xTy9g4eR2';
     }
 
     /**
@@ -36,6 +39,6 @@ class User implements UserInterface
      */
     public function eraseCredentials()
     {
-
+        $this->status = $this->getStatus();
     }
 }

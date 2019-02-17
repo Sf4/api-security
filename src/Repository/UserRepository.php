@@ -9,10 +9,17 @@
 namespace Sf4\ApiSecurity\Repository;
 
 use Doctrine\ORM\NonUniqueResultException;
+use Sf4\ApiSecurity\Entity\User;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 class UserRepository extends \Sf4\ApiUser\Repository\UserRepository
 {
+
+    protected function getEntityClass(): string
+    {
+        return User::class;
+    }
+
     public function getUserByToken(string $token): ?UserInterface
     {
         $qb = $this->createQueryBuilder('main');
