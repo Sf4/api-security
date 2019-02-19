@@ -42,8 +42,8 @@ class UserRightRepository extends AbstractRepository
         $queryBuilder->andWhere(
             $queryBuilder->expr()->andX(
                 $queryBuilder->expr()->in('role.code', $roles),
-                $queryBuilder->expr()->in('role.status', static::PARAMETER_STATUS_ACTIVE),
-                $queryBuilder->expr()->in('main.status', static::PARAMETER_STATUS_ACTIVE)
+                $queryBuilder->expr()->eq('role.status', static::PARAMETER_STATUS_ACTIVE),
+                $queryBuilder->expr()->eq('main.status', static::PARAMETER_STATUS_ACTIVE)
             )
         );
         $queryBuilder->setParameter(
@@ -52,5 +52,22 @@ class UserRightRepository extends AbstractRepository
         );
 
         return $queryBuilder->getQuery()->getArrayResult();
+    }
+
+    public function getRightsByCodes(array $codes)
+    {
+        $queryBuilder = $this->createQueryBuilder('main');
+        $queryBuilder->where(
+            $queryBuilder->expr()->andX(
+                $queryBuilder->expr()->in('main.code', $codes),
+                $queryBuilder->expr()->eq('main.status', static::PARAMETER_STATUS_ACTIVE)
+            )
+        );
+        $queryBuilder->setParameter(
+            static::PARAMETER_STATUS_ACTIVE,
+            StatusSettingInterface::ACTIVE
+        );
+
+        return $queryBuilder->getQuery()->getResult();
     }
 }

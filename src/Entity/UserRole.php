@@ -31,7 +31,7 @@ class UserRole implements EntityInterface, UserRoleInterface
     protected $name;
 
     /**
-     * @ORM\Column(length=15, nullable=true)
+     * @ORM\Column(length=20, nullable=true)
      */
     protected $code;
 }

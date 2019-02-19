@@ -19,6 +19,10 @@ class UserRight implements EntityInterface, UserRightInterface
 {
     use UserRightTrait;
 
+    public static $superAdminRights = [
+        UserRightInterface::RIGHT_API_SITE
+    ];
+
     /**
      * @ORM\Column(type="string", nullable=true)
      */

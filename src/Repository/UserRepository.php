@@ -9,8 +9,10 @@
 namespace Sf4\ApiSecurity\Repository;
 
 use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\QueryBuilder;
 use Sf4\ApiSecurity\Entity\User;
-use Symfony\Component\Security\Core\User\UserInterface;
+use Sf4\ApiSecurity\Entity\UserRoleInterface;
+use Sf4\ApiUser\Entity\UserInterface;
 
 class UserRepository extends \Sf4\ApiUser\Repository\UserRepository
 {
@@ -20,21 +22,44 @@ class UserRepository extends \Sf4\ApiUser\Repository\UserRepository
         return User::class;
     }
 
+    public function getSuperAdmin(): ?UserInterface
+    {
+        $queryBuilder = $this->createQueryBuilder('main');
+        $queryBuilder->where(
+            $queryBuilder->expr()->like(
+                'main.roles',
+                ':super_admin_role'
+            )
+        );
+        $queryBuilder->setParameter(
+            ':super_admin_role',
+            "%" . UserRoleInterface::ROLE_SUPER_ADMIN . "%"
+        );
+        $queryBuilder->setMaxResults(1);
+
+        return $this->getOneOrNullUser($queryBuilder);
+    }
+
     public function getUserByToken(string $token): ?UserInterface
     {
-        $qb = $this->createQueryBuilder('main');
+        $queryBuilder = $this->createQueryBuilder('main');
 
-        $qb->where(
-            $qb->expr()->eq('main.api_token', ':token')
+        $queryBuilder->where(
+            $queryBuilder->expr()->eq('main.api_token', ':token')
         );
-        $qb->setParameter(':token', $token);
+        $queryBuilder->setParameter(':token', $token);
 
-        $qb->andWhere(
-            $qb->expr()->isNull('main.deleted_at')
+        $queryBuilder->andWhere(
+            $queryBuilder->expr()->isNull('main.deleted_at')
         );
 
+        return $this->getOneOrNullUser($queryBuilder);
+    }
+
+    protected function getOneOrNullUser(QueryBuilder $queryBuilder): ?UserInterface
+    {
         try {
-            return $qb->getQuery()->getOneOrNullResult();
+            return $queryBuilder->getQuery()->getOneOrNullResult();
         } catch (NonUniqueResultException $e) {
             return null;
         }

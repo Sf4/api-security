@@ -10,8 +10,9 @@ namespace Sf4\ApiSecurity\EventSubscriber;
 
 use Sf4\Api\Repository\RepositoryFactory;
 use Sf4\Api\Request\RequestInterface;
+use Sf4\Api\RequestHandler\Traits\RepositoryFactoryTrait;
 use Sf4\ApiSecurity\Entity\UserRoleInterface;
-use Sf4\ApiSecurity\Repository\UserRightRepository;
+use Sf4\ApiSecurity\EventSubscriber\Traits\UserRightTrait;
 use Sf4\ApiSecurity\Response\AccessDeniedResponse;
 use Sf4\ApiUser\Entity\User;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -20,6 +21,9 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 
 class RequestSubscriber implements EventSubscriberInterface
 {
+
+    use UserRightTrait;
+    use RepositoryFactoryTrait;
 
     /** @var User $user */
     protected $user;
@@ -34,11 +38,14 @@ class RequestSubscriber implements EventSubscriberInterface
      */
     public function __construct(TokenStorageInterface $tokenStorage, RepositoryFactory $repositoryFactory)
     {
-        $user = $tokenStorage->getToken()->getUser();
-        if ($user) {
-            $this->user = $user;
+        $token = $tokenStorage->getToken();
+        if ($token) {
+            $user = $token->getUser();
+            if ($user) {
+                $this->user = $user;
+            }
         }
-        $this->repositoryFactory = $repositoryFactory;
+        $this->setRepositoryFactory($repositoryFactory);
     }
 
     /**
@@ -77,44 +84,11 @@ class RequestSubscriber implements EventSubscriberInterface
                 return true;
             }
 
-            $userRightCodes = $this->getUserRightCodes();
-            return $this->hasRight($route, $userRightCodes);
+            $userRightCodes = $this->getUserRightCodes($this->user);
+            return $this->rightCodeIsInRightCodes($route, $userRightCodes);
         }
 
         return false;
-    }
-
-    /**
-     * @param string $rightCode
-     * @param array $rightCodes
-     * @return bool
-     */
-    protected function hasRight(string $rightCode, array $rightCodes): bool
-    {
-        foreach ($rightCodes as $right) {
-            foreach ($right as $code) {
-                if ($code === $rightCode) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * @return array
-     */
-    protected function getUserRightCodes(): array
-    {
-        $repository = $this->repositoryFactory->create(
-            UserRightRepository::TABLE_NAME
-        );
-        if ($repository instanceof UserRightRepository) {
-            return $repository->getUserRights($this->user);
-        }
-
-        return [];
     }
 
     /**

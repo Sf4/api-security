@@ -11,6 +11,8 @@ namespace Sf4\ApiSecurity\Entity;
 interface UserRightInterface
 {
 
+    const RIGHT_API_SITE = 'api_site';
+
     /**
      * @return string|null
      */

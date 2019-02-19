@@ -45,6 +45,13 @@ config/services.yaml
 services:
     # ...
     
+    Sf4\ApiSecurity\Command\UserRightCreator:
+        class: Sf4\ApiSecurity\Command\UserRightCreator
+        tags:
+            - { name: 'console.command', command: 'api-security:create-user-rights' }
+        arguments:
+            $requestHandler: '@Sf4\Api\RequestHandler\RequestHandlerInterface'
+    
     Sf4\Api\Repository\RepositoryFactory:
         class: Sf4\Api\Repository\RepositoryFactory
         arguments:
@@ -111,9 +118,21 @@ security:
                     - Sf4\ApiSecurity\Security\Authenticator\TokenAuthenticator
     access_control:
         - { path: ^/security, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/site, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/admin, roles: ROLE_ADMIN }
         - { path: ^/user, roles: ROLE_USER }
 ```
+
+Create super admin
+``` bash
+bin/console api-security:create-super-admin
+```
+
+Create user rights
+``` bash
+bin/console api-security:create-user-rights
+```
+
 
 ## Testing
 

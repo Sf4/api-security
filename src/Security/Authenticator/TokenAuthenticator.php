@@ -9,8 +9,12 @@
 namespace Sf4\ApiSecurity\Security\Authenticator;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Sf4\Api\Repository\RepositoryFactory;
+use Sf4\Api\RequestHandler\Traits\RepositoryFactoryTrait;
 use Sf4\ApiSecurity\Entity\User;
+use Sf4\ApiSecurity\EventSubscriber\Traits\UserRightTrait;
 use Sf4\ApiSecurity\Repository\UserRepository;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -23,13 +27,29 @@ use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
 class TokenAuthenticator extends AbstractGuardAuthenticator
 {
 
-    const REQUEST_ATTRIBUTE = 'token';
+    use UserRightTrait;
+    use RepositoryFactoryTrait;
 
+    const REQUEST_ATTRIBUTE = 'token';
+    const REQUEST_ROUTE = '_route';
+
+    /** @var EntityManagerInterface $entityManager */
     protected $entityManager;
 
-    public function __construct(EntityManagerInterface $manager)
-    {
+    /** @var ParameterBagInterface $parameterBag */
+    protected $parameterBag;
+
+    /** @var RepositoryFactory $repositoryFactory */
+    protected $repositoryFactory;
+
+    public function __construct(
+        EntityManagerInterface $manager,
+        ParameterBagInterface $parameterBag,
+        RepositoryFactory $repositoryFactory
+    ) {
         $this->entityManager = $manager;
+        $this->parameterBag = $parameterBag;
+        $this->repositoryFactory = $repositoryFactory;
     }
 
     /**
@@ -103,7 +123,8 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
     public function getCredentials(Request $request)
     {
         return array(
-            static::REQUEST_ATTRIBUTE => $request->attributes->get(static::REQUEST_ATTRIBUTE)
+            static::REQUEST_ATTRIBUTE => $request->attributes->get(static::REQUEST_ATTRIBUTE),
+            static::REQUEST_ROUTE => $request->attributes->get(static::REQUEST_ROUTE)
         );
     }
 
@@ -125,14 +146,52 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
     public function getUser($credentials, UserProviderInterface $userProvider)
     {
         $apiToken = $credentials[static::REQUEST_ATTRIBUTE];
+        $user = null;
 
         if (null === $apiToken) {
-            return null;
+            $user = $this->createNewEmptyUser();
         }
 
-        /** @var UserRepository $repository */
+        if (null === $user) {
+            $parameterApiToken = $this->parameterBag->get('api_token');
+            if ($parameterApiToken === $apiToken) {
+                $superUser = $this->getUserRepository()->getSuperAdmin();
+                $userRightCodes = $this->getUserRightCodes($superUser);
+                if ($this->rightCodeIsInRightCodes($credentials[static::REQUEST_ROUTE], $userRightCodes)) {
+                    $user = $superUser;
+                }
+            }
+        }
+
+        if (null === $user) {
+            $user = $this->getUserRepository()->getUserByToken($apiToken);
+        }
+
+        return $user instanceof UserInterface ? $user : $this->createNewEmptyUser();
+    }
+
+    /**
+     * @return UserRepository|null
+     */
+    protected function getUserRepository(): ?UserRepository
+    {
         $repository = $this->entityManager->getRepository(User::class);
-        return $repository->getUserByToken($apiToken);
+        if ($repository instanceof UserRepository) {
+            return $repository;
+        }
+
+        return null;
+    }
+
+    /**
+     * @return User
+     */
+    protected function createNewEmptyUser(): User
+    {
+        $newUser = new User();
+        $newUser->setRoles([]);
+
+        return $newUser;
     }
 
     /**

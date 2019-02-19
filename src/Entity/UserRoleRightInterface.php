@@ -11,22 +11,22 @@ namespace Sf4\ApiSecurity\Entity;
 interface UserRoleRightInterface
 {
     /**
-     * @return int
+     * @return UserRole
      */
-    public function getRole(): int;
+    public function getRole(): UserRole;
 
     /**
-     * @param int $role
+     * @param UserRole $role
      */
-    public function setRole(int $role): void;
+    public function setRole(UserRole $role): void;
 
     /**
-     * @return int
+     * @return UserRight
      */
-    public function getRight(): int;
+    public function getRight(): UserRight;
 
     /**
-     * @param int $right
+     * @param UserRight $right
      */
-    public function setRight(int $right): void;
+    public function setRight(UserRight $right): void;
 }

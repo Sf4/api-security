@@ -9,45 +9,47 @@
 namespace Sf4\ApiSecurity\Entity\Traits;
 
 use Sf4\Api\Entity\Traits\EntityIdTrait;
+use Sf4\ApiSecurity\Entity\UserRight;
+use Sf4\ApiSecurity\Entity\UserRole;
 
 trait UserRoleRightTrait
 {
     use EntityIdTrait;
 
-    /** @var int $role */
+    /** @var UserRole $role */
     protected $role;
 
-    /** @var int $right */
+    /** @var UserRight $right */
     protected $right;
 
     /**
-     * @return int
+     * @return UserRole
      */
-    public function getRole(): int
+    public function getRole(): UserRole
     {
         return $this->role;
     }
 
     /**
-     * @param int $role
+     * @param UserRole $role
      */
-    public function setRole(int $role): void
+    public function setRole(UserRole $role): void
     {
         $this->role = $role;
     }
 
     /**
-     * @return int
+     * @return UserRight
      */
-    public function getRight(): int
+    public function getRight(): UserRight
     {
         return $this->right;
     }
 
     /**
-     * @param int $right
+     * @param UserRight $right
      */
-    public function setRight(int $right): void
+    public function setRight(UserRight $right): void
     {
         $this->right = $right;
     }
