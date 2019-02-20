@@ -8,7 +8,9 @@
 
 namespace Sf4\ApiSecurity\Command;
 
+use Curl\Curl;
 use Doctrine\ORM\EntityManagerInterface;
+use Sf4\Api\Dto\Response\SiteResponseDto;
 use Sf4\Api\Repository\RepositoryFactory;
 use Sf4\Api\Setting\StatusSettingInterface;
 use Sf4\ApiSecurity\Entity\UserRight;
@@ -30,6 +32,12 @@ class UserRightCreator extends Command
 {
 
     use TruncateTableTrait;
+
+    const SITE_SITE = 'site';
+    const SITE_URL = 'url';
+    const SITE_TOKEN = 'token';
+    const SITE_MAIN = 'main';
+    const SITE_PARENT = 'parent';
 
     protected static $defaultName = 'api-security:create-user-rights';
 
@@ -61,25 +69,58 @@ class UserRightCreator extends Command
         if ($superAdmin instanceof UserInterface) {
             $this->truncateTables();
             $availableRoutes = $this->requestHandler->getAvailableRoutes();
-            $this->addRights(array_keys($availableRoutes), $entityClass, $superAdmin);
+            $this->addRights(static::SITE_MAIN, array_keys($availableRoutes), $entityClass, $superAdmin);
+            $this->addSuperAdminRights($superAdmin);
             $sites = $this->requestHandler->getSites();
             foreach ($sites as $site) {
-                foreach ($site as $key => $value) {
-                    if ($key === 'parent' || $value === null) {
-                        continue 2;
-                    }
+                if (!isset($site[static::SITE_SITE]) ||
+                    !isset($site[static::SITE_URL]) ||
+                    $site[static::SITE_SITE] === static::SITE_PARENT ||
+                    $site[static::SITE_URL] === null
+                ) {
+                    continue;
                 }
-//                $this->addSiteRights($site, $entityClass, $superAdmin);
+                $this->addSiteRights($site, $entityClass, $superAdmin);
             }
         }
-        $this->addSuperAdminRights($superAdmin);
     }
 
-//    protected function addSiteRights(array $site, string $entityClass, UserInterface $superAdmin)
-//    {
-//        $apiToken = $site['token'];
-//        $url = $site['url'] . '/' . '/' . $apiToken;
-//    }
+    /**
+     * @param array $site
+     * @param string $entityClass
+     * @param UserInterface $superAdmin
+     * @throws \Exception
+     */
+    protected function addSiteRights(array $site, string $entityClass, UserInterface $superAdmin)
+    {
+        $siteName = $site[static::SITE_SITE];
+        $apiToken = isset($site[static::SITE_TOKEN]) ? $site[static::SITE_TOKEN] : '';
+        $url = $site[static::SITE_URL] . '/'. static::SITE_SITE .'/' . $apiToken;
+
+        try {
+            $curl = new Curl();
+            $curl->get($url);
+            $response = $curl->getResponse();
+            $curl->close();
+        } catch (\Exception $exception) {
+            $response = '{}';
+        }
+
+        if ($response) {
+            $data = json_decode($response, true);
+            if (is_array($data)) {
+                $dto = new SiteResponseDto();
+                $dto->populate($data);
+
+                foreach ($dto->getAvailableRoutes() as $code => $className) {
+                    $rights = [
+                        $siteName . ':' . $code
+                    ];
+                    $this->addRights($siteName, $rights, $entityClass, $superAdmin);
+                }
+            }
+        }
+    }
 
     /**
      * @param UserInterface $superAdmin
@@ -170,16 +211,18 @@ class UserRightCreator extends Command
     }
 
     /**
+     * @param string $site
      * @param array $rights
      * @param string $entityClass
      * @param UserInterface $superAdmin
      * @throws \Exception
      */
-    protected function addRights(array $rights, string $entityClass, UserInterface $superAdmin)
+    protected function addRights(string $site, array $rights, string $entityClass, UserInterface $superAdmin)
     {
         foreach ($rights as $rightCode) {
             /** @var UserRight $userRight */
             $userRight = new $entityClass();
+            $userRight->setSite($site);
             $userRight->setCode($rightCode);
             $userRight->createUuid();
             $userRight->setStatus(StatusSettingInterface::ACTIVE);

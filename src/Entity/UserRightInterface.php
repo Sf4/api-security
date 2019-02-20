@@ -22,4 +22,14 @@ interface UserRightInterface
      * @param string|null $code
      */
     public function setCode(?string $code): void;
+
+    /**
+     * @return string
+     */
+    public function getSite(): string;
+
+    /**
+     * @param string $site
+     */
+    public function setSite(string $site): void;
 }

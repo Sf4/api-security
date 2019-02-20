@@ -32,4 +32,9 @@ class UserRight implements EntityInterface, UserRightInterface
      * @ORM\Column(type="integer", nullable=true)
      */
     protected $status;
+
+    /**
+     * @ORM\Column(type="string", nullable=true)
+     */
+    protected $site;
 }

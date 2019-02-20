@@ -18,8 +18,10 @@
     ],
     "require": {
         "php": "~7.1",
+        "curl/curl": "^2.2",
         "sf4/api-user": "^1.4",
-        "symfony/security-bundle": "^4.2"
+        "symfony/security-bundle": "^4.2",
+        "ext-json": "*"
     },
     "require-dev": {
         "phpunit/phpunit" : ">=7.0",

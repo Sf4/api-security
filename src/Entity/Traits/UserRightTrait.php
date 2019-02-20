@@ -19,4 +19,23 @@ trait UserRightTrait
     use TimestampableTrait;
     use StatusTrait;
     use CodeTrait;
+
+    /** @var string $site */
+    protected $site;
+
+    /**
+     * @return string
+     */
+    public function getSite(): string
+    {
+        return $this->site;
+    }
+
+    /**
+     * @param string $site
+     */
+    public function setSite(string $site): void
+    {
+        $this->site = $site;
+    }
 }
