@@ -12,6 +12,7 @@ interface UserRoleInterface
 {
 
     const ROLE_SUPER_ADMIN = 'ROLE_SUPER_ADMIN';
+    const ROLE_ANONYMOUS = 'ROLE_ANONYMOUS';
 
     /**
      * @return string|null

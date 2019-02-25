@@ -123,6 +123,17 @@ security:
         - { path: ^/user, roles: ROLE_USER }
 ```
 
+config/packages/translation.yaml
+```
+framework:
+    # ...
+    translator:
+        # ...
+        paths:
+            # ...
+            - '%kernel.project_dir%/vendor/sf4/api-security/src/translations'
+```
+
 Create super admin
 ``` bash
 bin/console api-security:create-super-admin

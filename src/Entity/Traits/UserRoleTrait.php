@@ -21,4 +21,5 @@ trait UserRoleTrait
     use StatusTrait;
     use CodeTrait;
     use NameTrait;
+    use SiteTrait;
 }

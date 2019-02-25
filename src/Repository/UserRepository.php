@@ -22,19 +22,27 @@ class UserRepository extends \Sf4\ApiUser\Repository\UserRepository
         return User::class;
     }
 
+    public function getAnonymousUser(): ?UserInterface
+    {
+        return $this->getUserByRole(UserRoleInterface::ROLE_ANONYMOUS);
+    }
+
     public function getSuperAdmin(): ?UserInterface
     {
+        return $this->getUserByRole(UserRoleInterface::ROLE_SUPER_ADMIN);
+    }
+
+    protected function getUserByRole(string $role): ?UserInterface
+    {
+        $likeRole = '%'.$role.'%';
         $queryBuilder = $this->createQueryBuilder('main');
         $queryBuilder->where(
             $queryBuilder->expr()->like(
                 'main.roles',
-                ':super_admin_role'
+                ':role'
             )
         );
-        $queryBuilder->setParameter(
-            ':super_admin_role',
-            "%" . UserRoleInterface::ROLE_SUPER_ADMIN . "%"
-        );
+        $queryBuilder->setParameter(':role', $likeRole);
         $queryBuilder->setMaxResults(1);
 
         return $this->getOneOrNullUser($queryBuilder);

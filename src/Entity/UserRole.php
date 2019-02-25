@@ -11,11 +11,12 @@ namespace Sf4\ApiSecurity\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Sf4\Api\Entity\EntityInterface;
 use Sf4\ApiSecurity\Entity\Traits\UserRoleTrait;
+use Sf4\ApiUser\Entity\TimestampableInterface;
 
 /**
  * @ORM\Entity(repositoryClass="Sf4\ApiSecurity\Repository\UserRoleRepository")
  */
-class UserRole implements EntityInterface, UserRoleInterface
+class UserRole implements EntityInterface, UserRoleInterface, TimestampableInterface
 {
 
     use UserRoleTrait;
@@ -34,4 +35,10 @@ class UserRole implements EntityInterface, UserRoleInterface
      * @ORM\Column(length=20, nullable=true)
      */
     protected $code;
+
+
+    /**
+     * @ORM\Column(type="string", nullable=true)
+     */
+    protected $site;
 }

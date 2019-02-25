@@ -11,16 +11,21 @@ namespace Sf4\ApiSecurity\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Sf4\Api\Entity\EntityInterface;
 use Sf4\ApiSecurity\Entity\Traits\UserRightTrait;
+use Sf4\ApiUser\Entity\TimestampableInterface;
 
 /**
  * @ORM\Entity(repositoryClass="Sf4\ApiSecurity\Repository\UserRightRepository")
  */
-class UserRight implements EntityInterface, UserRightInterface
+class UserRight implements EntityInterface, UserRightInterface, TimestampableInterface
 {
     use UserRightTrait;
 
     public static $superAdminRights = [
         UserRightInterface::RIGHT_API_SITE
+    ];
+
+    public static $anonymousUserRights = [
+        UserRightInterface::RIGHT_API_DEFAULT
     ];
 
     /**

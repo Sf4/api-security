@@ -12,6 +12,7 @@ interface UserRightInterface
 {
 
     const RIGHT_API_SITE = 'api_site';
+    const RIGHT_API_DEFAULT = 'api_default';
 
     /**
      * @return string|null

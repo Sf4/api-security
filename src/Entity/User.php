@@ -9,15 +9,17 @@
 namespace Sf4\ApiSecurity\Entity;
 
 use Sf4\Api\Entity\EntityInterface;
+use Sf4\ApiUser\Entity\TimestampableInterface;
 use Sf4\ApiUser\Entity\Traits\UserTrait;
 use Sf4\ApiUser\Entity\UserFieldsInterface;
+use Sf4\ApiUser\Entity\UserInterface as ApiUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass="Sf4\ApiSecurity\Repository\UserRepository")
  */
-class User implements EntityInterface, UserFieldsInterface, UserInterface, \Sf4\ApiUser\Entity\UserInterface
+class User implements EntityInterface, UserFieldsInterface, UserInterface, ApiUserInterface, TimestampableInterface
 {
     use UserTrait;
 

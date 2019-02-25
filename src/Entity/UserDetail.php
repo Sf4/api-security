@@ -12,12 +12,13 @@ use Sf4\Api\Entity\EntityInterface;
 use Sf4\Api\Entity\Traits\EntityIdTrait;
 use Sf4\ApiUser\Entity\Traits\UserDetail\PublicTrait;
 use Sf4\ApiUser\Entity\UserDetailFieldInterface;
+use Sf4\ApiUser\Entity\UserDetailInterface as ApiUserDetailInterface;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass="Sf4\ApiSecurity\Repository\UserDetailRepository")
  */
-class UserDetail implements EntityInterface, UserDetailFieldInterface, \Sf4\ApiUser\Entity\UserDetailInterface
+class UserDetail implements EntityInterface, UserDetailFieldInterface, ApiUserDetailInterface
 {
     use EntityIdTrait;
     use PublicTrait;

@@ -12,7 +12,9 @@ use Sf4\Api\Repository\RepositoryFactory;
 use Sf4\Api\RequestHandler\Traits\RepositoryFactoryTrait;
 use Sf4\Api\Setting\StatusSettingInterface;
 use Sf4\ApiSecurity\Entity\User;
+use Sf4\ApiSecurity\Entity\UserDetail;
 use Sf4\ApiSecurity\Entity\UserRoleInterface;
+use Sf4\ApiSecurity\Repository\UserDetailRepository;
 use Sf4\ApiSecurity\Repository\UserRepository;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -41,17 +43,63 @@ class CreateSuperAdmin extends Command
         $entityClass = $this->getRepositoryFactory()->getEntityClass(
             UserRepository::TABLE_NAME
         );
+        $detailEntityClass = $this->getRepositoryFactory()->getEntityClass(
+            UserDetailRepository::TABLE_NAME
+        );
+
+        $this->createUser(
+            $entityClass,
+            $detailEntityClass,
+            [UserRoleInterface::ROLE_ANONYMOUS],
+            'anonymous.user@example.example'
+        );
+        $this->createUser(
+            $entityClass,
+            $detailEntityClass,
+            [UserRoleInterface::ROLE_SUPER_ADMIN],
+            'super.admin@example.example'
+        );
+    }
+
+    /**
+     * @param string $entityClass
+     * @param string $detailEntityClass
+     * @param array $roles
+     * @param string $email
+     * @throws \Exception
+     */
+    protected function createUser(string $entityClass, string $detailEntityClass, array $roles, string $email)
+    {
         /** @var User $user */
         $user = new $entityClass();
-        $user->createUuid();
         $user->setPassword($user->createNewToken());
         $user->setApiToken($user->createNewToken());
         $user->setStatus(StatusSettingInterface::ACTIVE);
-        $user->setRoles([UserRoleInterface::ROLE_SUPER_ADMIN]);
-        $user->setEmail('super.admin@example.example');
+        $user->setRoles($roles);
+        $user->setEmail($email);
         $user->setCreatedAt(new \DateTime());
         $user->setUpdatedAt(new \DateTime());
+        $user->setUserDetail(
+            $this->createUserDetail(
+                $detailEntityClass,
+                $email,
+                ''
+            )
+        );
+        $user->createUuid();
+
         $this->getRepositoryFactory()->getEntityManager()->persist($user);
         $this->getRepositoryFactory()->getEntityManager()->flush();
+    }
+
+    protected function createUserDetail(string $detailEntityClass, string $firstName, string $lastName)
+    {
+        /** @var UserDetail $userDetail */
+        $userDetail = new $detailEntityClass();
+        $userDetail->setFirstName($firstName);
+        $userDetail->setLastName($lastName);
+        $userDetail->createUuid();
+
+        return $userDetail;
     }
 }

@@ -12,6 +12,7 @@ use Curl\Curl;
 use Doctrine\ORM\EntityManagerInterface;
 use Sf4\Api\Dto\Response\SiteResponseDto;
 use Sf4\Api\Repository\RepositoryFactory;
+use Sf4\Api\RequestHandler\RequestHandlerTrait;
 use Sf4\Api\Setting\StatusSettingInterface;
 use Sf4\ApiSecurity\Entity\UserRight;
 use Sf4\ApiSecurity\Entity\UserRole;
@@ -23,6 +24,7 @@ use Sf4\Api\RequestHandler\RequestHandlerInterface;
 use Sf4\Api\Utils\Traits\TruncateTableTrait;
 use Sf4\ApiSecurity\Repository\UserRoleRepository;
 use Sf4\ApiSecurity\Repository\UserRoleRightRepository;
+use Sf4\ApiUser\Entity\TimestampableInterface;
 use Sf4\ApiUser\Entity\UserInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -32,6 +34,7 @@ class UserRightCreator extends Command
 {
 
     use TruncateTableTrait;
+    use RequestHandlerTrait;
 
     const SITE_SITE = 'site';
     const SITE_URL = 'url';
@@ -47,7 +50,7 @@ class UserRightCreator extends Command
     public function __construct(RequestHandlerInterface $requestHandler)
     {
         parent::__construct(null);
-        $this->requestHandler = $requestHandler;
+        $this->setRequestHandler($requestHandler);
     }
 
     /**
@@ -67,11 +70,34 @@ class UserRightCreator extends Command
         );
         $superAdmin = $userRepository->getSuperAdmin();
         if ($superAdmin instanceof UserInterface) {
+            /*
+             * Truncate role and rights table
+             */
             $this->truncateTables();
-            $availableRoutes = $this->requestHandler->getAvailableRoutes();
+
+            /*
+             * Add available rights
+             */
+            $availableRoutes = $this->getRequestHandler()->getAvailableRoutes();
             $this->addRights(static::SITE_MAIN, array_keys($availableRoutes), $entityClass, $superAdmin);
+
+            /*
+             * Add super admin rights
+             */
             $this->addSuperAdminRights($superAdmin);
-            $sites = $this->requestHandler->getSites();
+
+            /*
+             * Add anonymous user rights
+             */
+            $anonymousUser = $userRepository->getAnonymousUser();
+            if ($anonymousUser) {
+                $this->addAnonymousUserRights($anonymousUser);
+            }
+
+            /*
+             * Add site rights
+             */
+            $sites = $this->getRequestHandler()->getSites();
             foreach ($sites as $site) {
                 if (!isset($site[static::SITE_SITE]) ||
                     !isset($site[static::SITE_URL]) ||
@@ -128,8 +154,45 @@ class UserRightCreator extends Command
      */
     protected function addSuperAdminRights(UserInterface $superAdmin)
     {
+        $superAdminTranslation = $this->getRequestHandler()->getTranslator()->trans('user_role.super_admin');
         $rightCodes = UserRight::$superAdminRights;
-        $userRole = $this->createUserRole($superAdmin, UserRoleInterface::ROLE_SUPER_ADMIN, 'Super admin');
+        $this->addUserRights(
+            $superAdmin,
+            $rightCodes,
+            UserRoleInterface::ROLE_SUPER_ADMIN,
+            $superAdminTranslation,
+            null
+        );
+    }
+
+    /**
+     * @param UserInterface $user
+     * @throws \Exception
+     */
+    protected function addAnonymousUserRights(UserInterface $user)
+    {
+        $anonymousUserTranslation = $this->getRequestHandler()->getTranslator()->trans('user_role.anonymous_user');
+        $rightCodes = UserRight::$anonymousUserRights;
+        $this->addUserRights(
+            $user,
+            $rightCodes,
+            UserRoleInterface::ROLE_ANONYMOUS,
+            $anonymousUserTranslation,
+            null
+        );
+    }
+
+    /**
+     * @param UserInterface $user
+     * @param array $rightCodes
+     * @param string $code
+     * @param string $name
+     * @param string $site
+     * @throws \Exception
+     */
+    protected function addUserRights(UserInterface $user, array $rightCodes, string $code, string $name, string $site)
+    {
+        $userRole = $this->createUserRole($user, $code, $name, $site);
         $userRights = $this->getRightsByCodes($rightCodes);
 
         foreach ($userRights as $userRight) {
@@ -173,20 +236,24 @@ class UserRightCreator extends Command
      * @param UserInterface $superAdmin
      * @param string $code
      * @param string $name
+     * @param string $site
      * @return UserRole
      * @throws \Exception
      */
-    protected function createUserRole(UserInterface $superAdmin, string $code, string $name): UserRole
+    protected function createUserRole(UserInterface $superAdmin, string $code, string $name, string $site): UserRole
     {
         $userRole = new UserRole();
-        $userRole->createUuid();
         $userRole->setCode($code);
         $userRole->setName($name);
-        $userRole->setCreatedAt(new \DateTime());
-        $userRole->setUpdatedAt(new \DateTime());
-        $userRole->setCreatedBy($superAdmin);
-        $userRole->setUpdatedBy($superAdmin);
+        $userRole->setSite($site);
+
+        if ($userRole instanceof TimestampableInterface) {
+            $this->addTimeAndUser($userRole, $superAdmin);
+        }
+
         $userRole->setStatus(StatusSettingInterface::ACTIVE);
+        $userRole->createUuid();
+
         $this->getEntityManager()->persist($userRole);
         $this->getEntityManager()->flush();
 
@@ -226,17 +293,29 @@ class UserRightCreator extends Command
             $userRight->setCode($rightCode);
             $userRight->createUuid();
             $userRight->setStatus(StatusSettingInterface::ACTIVE);
-            $userRight->setCreatedAt(new \DateTime());
-            $userRight->setUpdatedAt(new \DateTime());
-            $userRight->setCreatedBy($superAdmin);
-            $userRight->setUpdatedBy($superAdmin);
+
+            if ($userRight instanceof TimestampableInterface) {
+                $this->addTimeAndUser($userRight, $superAdmin);
+            }
 
             $this->getEntityManager()->persist($userRight);
         }
         $this->getEntityManager()->flush();
     }
 
-
+    /**
+     * @param TimestampableInterface $entity
+     * @param UserInterface $user
+     * @throws \Exception
+     */
+    protected function addTimeAndUser(TimestampableInterface $entity, UserInterface $user)
+    {
+        $dateTime = new \DateTime('now');
+        $entity->setCreatedAt($dateTime);
+        $entity->setUpdatedAt($dateTime);
+        $entity->setCreatedBy($user);
+        $entity->setUpdatedBy($user);
+    }
 
     /**
      * @return EntityManagerInterface
