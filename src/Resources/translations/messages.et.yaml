@@ -1,0 +1,4 @@
+user_role:
+    super_admin: 'Super administrator'
+    anonymous_user: 'Anonüümne kasutaja'
+access_denied: 'Ligipääs keelatud'

@@ -1,0 +1,23 @@
+services:
+    Sf4\ApiSecurity\EventSubscriber\RequestSubscriber:
+        class: Sf4\ApiSecurity\EventSubscriber\RequestSubscriber
+        lazy: true
+        tags: ['kernel.event_subscriber']
+        arguments:
+            $repositoryFactory: '@Sf4\Api\Repository\RepositoryFactory'
+
+    Sf4\ApiSecurity\Command\UserRightCreator:
+        class: Sf4\ApiSecurity\Command\UserRightCreator
+        lazy: true
+        tags:
+            - { name: 'console.command', command: 'api-security:create-user-rights' }
+        arguments:
+            $requestHandler: '@Sf4\Api\RequestHandler\RequestHandlerInterface'
+
+    Sf4\ApiSecurity\Command\CreateSuperAdmin:
+        class: Sf4\ApiSecurity\Command\CreateSuperAdmin
+        lazy: true
+        tags:
+            - { name: 'console.command', command: 'api-security:create-super-admin' }
+        arguments:
+            $repositoryFactory: '@Sf4\Api\Repository\RepositoryFactory'

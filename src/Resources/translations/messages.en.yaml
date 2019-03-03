@@ -1,3 +1,4 @@
 user_role:
     super_admin: 'Super admin'
     anonymous_user: 'Anonymous user'
+access_denied: 'Access Denied'
