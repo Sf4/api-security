@@ -9,7 +9,9 @@
 namespace Sf4\ApiSecurity\EventSubscriber\Traits;
 
 use Sf4\Api\Repository\RepositoryFactory;
+use Sf4\Api\Request\RequestInterface;
 use Sf4\ApiSecurity\Repository\UserRightRepository;
+use Sf4\ApiSecurity\CacheAdapter\CacheKeysInterface;
 use Sf4\ApiUser\Entity\UserInterface;
 
 trait UserRightTrait
@@ -36,17 +38,29 @@ trait UserRightTrait
 
     /**
      * @param UserInterface $user
+     * @param RequestInterface $request
      * @return array
+     * @throws \Psr\Cache\CacheException
+     * @throws \Psr\Cache\InvalidArgumentException
      */
-    protected function getUserRightCodes(UserInterface $user): array
+    protected function getUserRightCodes(UserInterface $user, RequestInterface $request): array
     {
-        $repository = $this->getRepositoryFactory()->create(
-            UserRightRepository::TABLE_NAME
-        );
-        if ($repository instanceof UserRightRepository) {
-            return $repository->getUserRights($user);
-        }
+        return $request->getRequestHandler()->getCacheDataOrAdd(
+            CacheKeysInterface::KEY_USER_RIGHT_CODES . $user->getId(),
+            function () use ($user) {
+                $repository = $this->getRepositoryFactory()->create(
+                    UserRightRepository::TABLE_NAME
+                );
+                if ($repository instanceof UserRightRepository) {
+                    return $repository->getUserRights($user);
+                }
 
-        return [];
+                return [];
+            },
+            [
+                CacheKeysInterface::TAG_USER_RIGHT
+            ],
+            null
+        );
     }
 }

@@ -77,7 +77,7 @@ class RequestSubscriber implements EventSubscriberInterface
         $user = $this->getCurrentUser($request);
 
         if (!$user) {
-            $user = $this->getAnonymousUser();
+            $user = $this->getAnonymousUser($request);
         }
 
         if ($route && $user) {
@@ -86,7 +86,7 @@ class RequestSubscriber implements EventSubscriberInterface
                 return true;
             }
 
-            $userRightCodes = $this->getUserRightCodes($user);
+            $userRightCodes = $this->getUserRightCodes($user, $request);
             return $this->rightCodeIsInRightCodes($route, $userRightCodes);
         }
 
@@ -94,16 +94,28 @@ class RequestSubscriber implements EventSubscriberInterface
     }
 
     /**
+     * @param RequestInterface $request
      * @return UserInterface|null
+     * @throws \Psr\Cache\CacheException
+     * @throws \Psr\Cache\InvalidArgumentException
      */
-    protected function getAnonymousUser(): ?UserInterface
+    protected function getAnonymousUser(RequestInterface $request): ?UserInterface
     {
-        /** @var UserRepository $userRepository */
-        $userRepository = $this->getRepositoryFactory()->create(
-            UserRepository::TABLE_NAME
-        );
+        return $request->getRequestHandler()->getCacheDataOrAdd(
+            'anonymous_user',
+            function () {
+                /** @var UserRepository $userRepository */
+                $userRepository = $this->getRepositoryFactory()->create(
+                    UserRepository::TABLE_NAME
+                );
 
-        return $userRepository->getUserByRole(UserRoleInterface::ROLE_ANONYMOUS);
+                return $userRepository->getUserByRole(UserRoleInterface::ROLE_ANONYMOUS);
+            },
+            [
+                CacheKeysInterface::TAG_USER
+            ],
+            null
+        );
     }
 
     /**
