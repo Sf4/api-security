@@ -15,6 +15,7 @@ use Sf4\ApiSecurity\Entity\UserRoleInterface;
 use Sf4\ApiSecurity\EventSubscriber\Traits\UserRightTrait;
 use Sf4\ApiSecurity\Repository\UserRepository;
 use Sf4\ApiSecurity\Response\AccessDeniedResponse;
+use Sf4\ApiUser\CacheAdapter\CacheKeysInterface;
 use Sf4\ApiUser\Entity\UserInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Sf4\Api\Event\RequestCreatedEvent;
@@ -52,6 +53,7 @@ class RequestSubscriber implements EventSubscriberInterface
 
     /**
      * @param RequestCreatedEvent $event
+     * @throws \Psr\Cache\CacheException
      * @throws \Psr\Cache\InvalidArgumentException
      */
     public function handleRequestCreated(RequestCreatedEvent $event)
@@ -66,6 +68,7 @@ class RequestSubscriber implements EventSubscriberInterface
     /**
      * @param RequestInterface $request
      * @return bool
+     * @throws \Psr\Cache\CacheException
      * @throws \Psr\Cache\InvalidArgumentException
      */
     protected function isGranted(RequestInterface $request): bool
@@ -106,6 +109,7 @@ class RequestSubscriber implements EventSubscriberInterface
     /**
      * @param RequestInterface $request
      * @return UserInterface|null
+     * @throws \Psr\Cache\CacheException
      * @throws \Psr\Cache\InvalidArgumentException
      */
     protected function getCurrentUser(RequestInterface $request): ?UserInterface
@@ -115,25 +119,22 @@ class RequestSubscriber implements EventSubscriberInterface
             return null;
         }
 
-        $cacheAdapter = $request->getRequestHandler()->getCacheAdapter();
-        $cacheItem = $cacheAdapter->getItem('user_by_token_' . $token);
-        if ($cacheItem->isHit()) {
-            $user = $cacheItem->get();
-        } else {
-            /** @var UserRepository $userRepository */
-            $userRepository = $this->getRepositoryFactory()->create(
-                UserRepository::TABLE_NAME
-            );
+        return $request->getRequestHandler()->getCacheDataOrAdd(
+            'user_by_token_' . $token,
+            function () use ($token) {
+                /** @var UserRepository $userRepository */
+                $userRepository = $this->getRepositoryFactory()->create(
+                    UserRepository::TABLE_NAME
+                );
 
-            $user = $userRepository->getUserByToken($token);
-
-            $cacheItem->set($user);
-            $cacheItem->expiresAfter(static::CURRENT_USER_CACHE_TIME);
-
-            $cacheAdapter->save($cacheItem);
-        }
-
-        return $user;
+                return $userRepository->getUserByToken($token);
+            },
+            [
+                CacheKeysInterface::TAG_USER,
+                CacheKeysInterface::TAG_USER_DETAIL
+            ],
+            null
+        );
     }
 
     /**

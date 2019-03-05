@@ -27,10 +27,10 @@ interface UserRightInterface
     /**
      * @return string
      */
-    public function getSite(): string;
+    public function getSite(): ?string;
 
     /**
      * @param string $site
      */
-    public function setSite(string $site): void;
+    public function setSite(?string $site): void;
 }

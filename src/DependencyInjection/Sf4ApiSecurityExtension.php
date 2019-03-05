@@ -10,8 +10,14 @@ namespace Sf4\ApiSecurity\DependencyInjection;
 
 use Sf4\ApiSecurity\Entity\User;
 use Sf4\ApiSecurity\Entity\UserDetail;
+use Sf4\ApiSecurity\Entity\UserRight;
+use Sf4\ApiSecurity\Entity\UserRole;
+use Sf4\ApiSecurity\Entity\UserRoleRight;
 use Sf4\ApiSecurity\Repository\UserDetailRepository;
 use Sf4\ApiSecurity\Repository\UserRepository;
+use Sf4\ApiSecurity\Repository\UserRightRepository;
+use Sf4\ApiSecurity\Repository\UserRoleRepository;
+use Sf4\ApiSecurity\Repository\UserRoleRightRepository;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
@@ -73,6 +79,18 @@ class Sf4ApiSecurityExtension extends Extension implements PrependExtensionInter
             [
                 Sf4ApiConfiguration::ENTITIES_TABLE_NAME => UserDetailRepository::TABLE_NAME,
                 Sf4ApiConfiguration::ENTITIES_ENTITY_CLASS => UserDetail::class
+            ],
+            [
+                Sf4ApiConfiguration::ENTITIES_TABLE_NAME => UserRightRepository::TABLE_NAME,
+                Sf4ApiConfiguration::ENTITIES_ENTITY_CLASS => UserRight::class
+            ],
+            [
+                Sf4ApiConfiguration::ENTITIES_TABLE_NAME => UserRoleRepository::TABLE_NAME,
+                Sf4ApiConfiguration::ENTITIES_ENTITY_CLASS => UserRole::class
+            ],
+            [
+                Sf4ApiConfiguration::ENTITIES_TABLE_NAME => UserRoleRightRepository::TABLE_NAME,
+                Sf4ApiConfiguration::ENTITIES_ENTITY_CLASS => UserRoleRight::class
             ]
         ];
     }
