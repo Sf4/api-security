@@ -8,13 +8,13 @@
 
 namespace Sf4\ApiSecurity\DependencyInjection;
 
-use Sf4\ApiSecurity\Entity\User;
-use Sf4\ApiSecurity\Entity\UserDetail;
+use Sf4\ApiUser\Entity\User;
+use Sf4\ApiUser\Entity\UserDetail;
 use Sf4\ApiSecurity\Entity\UserRight;
 use Sf4\ApiSecurity\Entity\UserRole;
 use Sf4\ApiSecurity\Entity\UserRoleRight;
-use Sf4\ApiSecurity\Repository\UserDetailRepository;
-use Sf4\ApiSecurity\Repository\UserRepository;
+use Sf4\ApiUser\Repository\UserDetailRepository;
+use Sf4\ApiUser\Repository\UserRepository;
 use Sf4\ApiSecurity\Repository\UserRightRepository;
 use Sf4\ApiSecurity\Repository\UserRoleRepository;
 use Sf4\ApiSecurity\Repository\UserRoleRightRepository;

@@ -18,7 +18,7 @@ use Sf4\ApiSecurity\Entity\UserRight;
 use Sf4\ApiSecurity\Entity\UserRole;
 use Sf4\ApiSecurity\Entity\UserRoleInterface;
 use Sf4\ApiSecurity\Entity\UserRoleRight;
-use Sf4\ApiSecurity\Repository\UserRepository;
+use Sf4\ApiUser\Repository\UserRepository;
 use Sf4\ApiSecurity\Repository\UserRightRepository;
 use Sf4\Api\RequestHandler\RequestHandlerInterface;
 use Sf4\Api\Utils\Traits\TruncateTableTrait;
@@ -68,7 +68,7 @@ class UserRightCreator extends Command
         $userRepository = $this->getRepositoryFactory()->create(
             UserRepository::TABLE_NAME
         );
-        $superAdmin = $userRepository->getSuperAdmin();
+        $superAdmin = $userRepository->getUserByRole(UserRoleInterface::ROLE_SUPER_ADMIN);
         if ($superAdmin instanceof UserInterface) {
             /*
              * Truncate role and rights table
@@ -89,7 +89,7 @@ class UserRightCreator extends Command
             /*
              * Add anonymous user rights
              */
-            $anonymousUser = $userRepository->getAnonymousUser();
+            $anonymousUser = $userRepository->getUserByRole(UserRoleInterface::ROLE_ANONYMOUS);
             if ($anonymousUser) {
                 $this->addAnonymousUserRights($anonymousUser);
             }

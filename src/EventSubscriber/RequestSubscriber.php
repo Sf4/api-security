@@ -13,7 +13,7 @@ use Sf4\Api\Request\RequestInterface;
 use Sf4\Api\RequestHandler\Traits\RepositoryFactoryTrait;
 use Sf4\ApiSecurity\Entity\UserRoleInterface;
 use Sf4\ApiSecurity\EventSubscriber\Traits\UserRightTrait;
-use Sf4\ApiSecurity\Repository\UserRepository;
+use Sf4\ApiUser\Repository\UserRepository;
 use Sf4\ApiSecurity\Response\AccessDeniedResponse;
 use Sf4\ApiUser\CacheAdapter\CacheKeysInterface;
 use Sf4\ApiUser\Entity\UserInterface;
@@ -103,7 +103,7 @@ class RequestSubscriber implements EventSubscriberInterface
             UserRepository::TABLE_NAME
         );
 
-        return $userRepository->getAnonymousUser();
+        return $userRepository->getUserByRole(UserRoleInterface::ROLE_ANONYMOUS);
     }
 
     /**
