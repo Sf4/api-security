@@ -18,14 +18,4 @@ use Doctrine\ORM\Mapping as ORM;
 class UserRoleRight implements EntityInterface, UserRoleRightInterface
 {
     use UserRoleRightTrait;
-
-    /**
-     * @ORM\ManyToOne(targetEntity="Sf4\ApiSecurity\Entity\UserRole", cascade={"persist"})
-     */
-    protected $role;
-
-    /**
-     * @ORM\ManyToOne(targetEntity="Sf4\ApiSecurity\Entity\UserRight", cascade={"persist"})
-     */
-    protected $right;
 }

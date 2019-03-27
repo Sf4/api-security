@@ -17,10 +17,10 @@ use Doctrine\ORM\Query\Expr\Join;
 
 class UserRightRepository extends AbstractRepository
 {
-    const TABLE_NAME = 'user_right';
-    const PARAMETER_STATUS_ACTIVE = ':status_active';
+    public const TABLE_NAME = 'user_right';
+    public const PARAMETER_STATUS_ACTIVE = ':status_active';
 
-    public function getUserRights(UserInterface $user)
+    public function getUserRights(UserInterface $user): array
     {
         $roles = $user->getRoles();
         $queryBuilder = $this->createQueryBuilder('main');

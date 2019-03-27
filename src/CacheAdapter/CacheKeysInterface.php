@@ -10,7 +10,7 @@ namespace Sf4\ApiSecurity\CacheAdapter;
 
 interface CacheKeysInterface
 {
-    const KEY_USER_RIGHT_CODES = 'USER_RIGHT_CODES_';
+    public const KEY_USER_RIGHT_CODES = 'USER_RIGHT_CODES_';
 
-    const TAG_USER_RIGHT = 'USER_RIGHT';
+    public const TAG_USER_RIGHT = 'USER_RIGHT';
 }

@@ -45,22 +45,29 @@ trait UserRightTrait
      */
     protected function getUserRightCodes(UserInterface $user, RequestInterface $request): array
     {
-        return $request->getRequestHandler()->getCacheDataOrAdd(
+        $requestHandler = $request->getRequestHandler();
+        if (!$requestHandler) {
+            return [];
+        }
+
+        return $requestHandler->getCacheDataOrAdd(
             CacheKeysInterface::KEY_USER_RIGHT_CODES . $user->getId(),
             function () use ($user) {
-                $repository = $this->getRepositoryFactory()->create(
-                    UserRightRepository::TABLE_NAME
-                );
-                if ($repository instanceof UserRightRepository) {
-                    return $repository->getUserRights($user);
+                $repositoryFactory = $this->getRepositoryFactory();
+                if ($repositoryFactory) {
+                    $repository = $repositoryFactory->create(
+                        UserRightRepository::TABLE_NAME
+                    );
+                    if ($repository instanceof UserRightRepository) {
+                        return $repository->getUserRights($user);
+                    }
                 }
 
                 return [];
             },
             [
                 CacheKeysInterface::TAG_USER_RIGHT
-            ],
-            null
+            ]
         );
     }
 }

@@ -16,10 +16,16 @@ trait UserRoleRightTrait
 {
     use EntityIdTrait;
 
-    /** @var UserRole $role */
+    /**
+     * @ORM\ManyToOne(targetEntity="Sf4\ApiSecurity\Entity\UserRole", cascade={"persist"})
+     * @var UserRole $role
+     */
     protected $role;
 
-    /** @var UserRight $right */
+    /**
+     * @ORM\ManyToOne(targetEntity="Sf4\ApiSecurity\Entity\UserRight", cascade={"persist"})
+     * @var UserRight $right
+     */
     protected $right;
 
     /**

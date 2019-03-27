@@ -21,3 +21,6 @@ services:
             - { name: 'console.command', command: 'api-security:create-super-admin' }
         arguments:
             $repositoryFactory: '@Sf4\Api\Repository\RepositoryFactory'
+
+    Sf4\ApiSecurity\Routing\ApiSecurityLoader:
+        tags: [routing.loader]

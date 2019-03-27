@@ -36,20 +36,17 @@ class UserRightCreator extends Command
     use TruncateTableTrait;
     use RequestHandlerTrait;
 
-    const SITE_SITE = 'site';
-    const SITE_URL = 'url';
-    const SITE_TOKEN = 'token';
-    const SITE_MAIN = 'main';
-    const SITE_PARENT = 'parent';
+    public const SITE_SITE = 'site';
+    public const SITE_URL = 'url';
+    public const SITE_TOKEN = 'token';
+    public const SITE_MAIN = 'main';
+    public const SITE_PARENT = 'parent';
 
     protected static $defaultName = 'api-security:create-user-rights';
 
-    /** @var RequestHandlerInterface $requestHandler */
-    protected $requestHandler;
-
     public function __construct(RequestHandlerInterface $requestHandler)
     {
-        parent::__construct(null);
+        parent::__construct();
         $this->setRequestHandler($requestHandler);
     }
 
@@ -75,38 +72,40 @@ class UserRightCreator extends Command
              */
             $this->truncateTables();
 
-            /*
-             * Add available rights
-             */
-            $availableRoutes = $this->getRequestHandler()->getAvailableRoutes();
-            $this->addRights(static::SITE_MAIN, array_keys($availableRoutes), $entityClass, $superAdmin);
+            $requestHandler = $this->getRequestHandler();
+            if ($requestHandler) {
+                /*
+                 * Add available rights
+                 */
+                $availableRoutes = $requestHandler->getAvailableRoutes();
+                $this->addRights(static::SITE_MAIN, array_keys($availableRoutes), $entityClass, $superAdmin);
 
-            /*
-             * Add super admin rights
-             */
-            $this->addSuperAdminRights($superAdmin);
+                /*
+                 * Add super admin rights
+                 */
+                $this->addSuperAdminRights($superAdmin);
 
-            /*
-             * Add anonymous user rights
-             */
-            $anonymousUser = $userRepository->getUserByRole(UserRoleInterface::ROLE_ANONYMOUS);
-            if ($anonymousUser) {
-                $this->addAnonymousUserRights($anonymousUser);
-            }
-
-            /*
-             * Add site rights
-             */
-            $sites = $this->getRequestHandler()->getSites();
-            foreach ($sites as $site) {
-                if (!isset($site[static::SITE_SITE]) ||
-                    !isset($site[static::SITE_URL]) ||
-                    $site[static::SITE_SITE] === static::SITE_PARENT ||
-                    $site[static::SITE_URL] === null
-                ) {
-                    continue;
+                /*
+                 * Add anonymous user rights
+                 */
+                $anonymousUser = $userRepository->getUserByRole(UserRoleInterface::ROLE_ANONYMOUS);
+                if ($anonymousUser) {
+                    $this->addAnonymousUserRights($anonymousUser);
                 }
-                $this->addSiteRights($site, $entityClass, $superAdmin);
+
+                /*
+                 * Add site rights
+                 */
+                $sites = $requestHandler->getSites();
+                foreach ($sites as $site) {
+                    if (!isset($site[static::SITE_SITE], $site[static::SITE_URL]) ||
+                        $site[static::SITE_SITE] === static::SITE_PARENT ||
+                        $site[static::SITE_URL] === null
+                    ) {
+                        continue;
+                    }
+                    $this->addSiteRights($site, $entityClass, $superAdmin);
+                }
             }
         }
     }
@@ -117,10 +116,10 @@ class UserRightCreator extends Command
      * @param UserInterface $superAdmin
      * @throws \Exception
      */
-    protected function addSiteRights(array $site, string $entityClass, UserInterface $superAdmin)
+    protected function addSiteRights(array $site, string $entityClass, UserInterface $superAdmin): void
     {
         $siteName = $site[static::SITE_SITE];
-        $apiToken = isset($site[static::SITE_TOKEN]) ? $site[static::SITE_TOKEN] : '';
+        $apiToken = $site[static::SITE_TOKEN] ?? '';
         $url = $site[static::SITE_URL] . '/'. static::SITE_SITE .'/' . $apiToken;
 
         try {
@@ -152,34 +151,38 @@ class UserRightCreator extends Command
      * @param UserInterface $superAdmin
      * @throws \Exception
      */
-    protected function addSuperAdminRights(UserInterface $superAdmin)
+    protected function addSuperAdminRights(UserInterface $superAdmin): void
     {
-        $superAdminTranslation = $this->getRequestHandler()->getTranslator()->trans('user_role.super_admin');
-        $rightCodes = UserRight::$superAdminRights;
-        $this->addUserRights(
-            $superAdmin,
-            $rightCodes,
-            UserRoleInterface::ROLE_SUPER_ADMIN,
-            $superAdminTranslation,
-            null
-        );
+        $requestHandler = $this->getRequestHandler();
+        if ($requestHandler) {
+            $superAdminTranslation = $requestHandler->getTranslator()->trans('user_role.super_admin');
+            $rightCodes = UserRight::$superAdminRights;
+            $this->addUserRights(
+                $superAdmin,
+                $rightCodes,
+                UserRoleInterface::ROLE_SUPER_ADMIN,
+                $superAdminTranslation
+            );
+        }
     }
 
     /**
      * @param UserInterface $user
      * @throws \Exception
      */
-    protected function addAnonymousUserRights(UserInterface $user)
+    protected function addAnonymousUserRights(UserInterface $user): void
     {
-        $anonymousUserTranslation = $this->getRequestHandler()->getTranslator()->trans('user_role.anonymous_user');
-        $rightCodes = UserRight::$anonymousUserRights;
-        $this->addUserRights(
-            $user,
-            $rightCodes,
-            UserRoleInterface::ROLE_ANONYMOUS,
-            $anonymousUserTranslation,
-            null
-        );
+        $requestHandler = $this->getRequestHandler();
+        if ($requestHandler) {
+            $anonymousUserTranslation = $requestHandler->getTranslator()->trans('user_role.anonymous_user');
+            $rightCodes = UserRight::$anonymousUserRights;
+            $this->addUserRights(
+                $user,
+                $rightCodes,
+                UserRoleInterface::ROLE_ANONYMOUS,
+                $anonymousUserTranslation
+            );
+        }
     }
 
     /**
@@ -190,8 +193,13 @@ class UserRightCreator extends Command
      * @param string $site
      * @throws \Exception
      */
-    protected function addUserRights(UserInterface $user, array $rightCodes, string $code, string $name, string $site)
-    {
+    protected function addUserRights(
+        UserInterface $user,
+        array $rightCodes,
+        string $code,
+        string $name,
+        string $site = null
+    ): void {
         $userRole = $this->createUserRole($user, $code, $name, $site);
         $userRights = $this->getRightsByCodes($rightCodes);
 
@@ -222,7 +230,7 @@ class UserRightCreator extends Command
      * @param UserRole $role
      * @param UserRight $right
      */
-    protected function createUserRoleRight(UserRole $role, UserRight $right)
+    protected function createUserRoleRight(UserRole $role, UserRight $right): void
     {
         $userRoleRight = new UserRoleRight();
         $userRoleRight->createUuid();
@@ -240,8 +248,12 @@ class UserRightCreator extends Command
      * @return UserRole
      * @throws \Exception
      */
-    protected function createUserRole(UserInterface $superAdmin, string $code, string $name, string $site): UserRole
-    {
+    protected function createUserRole(
+        UserInterface $superAdmin,
+        string $code,
+        string $name,
+        string $site = null
+    ): UserRole {
         $userRole = new UserRole();
         $userRole->setCode($code);
         $userRole->setName($name);
@@ -263,7 +275,7 @@ class UserRightCreator extends Command
     /**
      * @throws \Exception
      */
-    protected function truncateTables()
+    protected function truncateTables(): void
     {
         $em = $this->getEntityManager();
         $this->truncateTable($em, $this->getRepositoryFactory()->getEntityClass(
@@ -284,7 +296,7 @@ class UserRightCreator extends Command
      * @param UserInterface $superAdmin
      * @throws \Exception
      */
-    protected function addRights(string $site, array $rights, string $entityClass, UserInterface $superAdmin)
+    protected function addRights(string $site, array $rights, string $entityClass, UserInterface $superAdmin): void
     {
         foreach ($rights as $rightCode) {
             /** @var UserRight $userRight */
@@ -308,7 +320,7 @@ class UserRightCreator extends Command
      * @param UserInterface $user
      * @throws \Exception
      */
-    protected function addTimeAndUser(TimestampableInterface $entity, UserInterface $user)
+    protected function addTimeAndUser(TimestampableInterface $entity, UserInterface $user): void
     {
         $dateTime = new \DateTime('now');
         $entity->setCreatedAt($dateTime);

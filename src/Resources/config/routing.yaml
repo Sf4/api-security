@@ -1,0 +1,3 @@
+sf4_api_security_google_login:
+    path: /google-login
+    methods: [GET, OPTIONS]

@@ -17,7 +17,14 @@ class AccessDeniedResponse extends AbstractResponse
     public function init()
     {
         $errorMessage = 'access_denied';
-        $errorMessageTranslation = $this->getRequest()->getRequestHandler()->getTranslator()->trans($errorMessage);
+        $errorMessageTranslation = $errorMessage;
+        $request = $this->getRequest();
+        if ($request) {
+            $requestHandler = $request->getRequestHandler();
+            if ($requestHandler) {
+                $errorMessageTranslation = $requestHandler->getTranslator()->trans($errorMessage);
+            }
+        }
 
         $this->setResponseDto(
             new AccessDeniedDto(

@@ -11,8 +11,8 @@ namespace Sf4\ApiSecurity\Entity;
 interface UserRoleInterface
 {
 
-    const ROLE_SUPER_ADMIN = 'ROLE_SUPER_ADMIN';
-    const ROLE_ANONYMOUS = 'ROLE_ANONYMOUS';
+    public const ROLE_SUPER_ADMIN = 'ROLE_SUPER_ADMIN';
+    public const ROLE_ANONYMOUS = 'ROLE_ANONYMOUS';
 
     /**
      * @return string|null

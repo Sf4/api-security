@@ -8,6 +8,7 @@
 
 namespace Sf4\ApiSecurity\DependencyInjection;
 
+use Sf4\ApiSecurity\Request\GoogleLoginRequest;
 use Sf4\ApiUser\Entity\User;
 use Sf4\ApiUser\Entity\UserDetail;
 use Sf4\ApiSecurity\Entity\UserRight;
@@ -29,7 +30,7 @@ class Sf4ApiSecurityExtension extends Extension implements PrependExtensionInter
 
     use Sf4ApiExtensionTrait;
 
-    const SF4_API_BUNDLE = 'Sf4ApiBundle';
+    public const SF4_API_BUNDLE = 'Sf4ApiBundle';
 
     /**
      * Loads a specific configuration.
@@ -38,7 +39,7 @@ class Sf4ApiSecurityExtension extends Extension implements PrependExtensionInter
      * @param ContainerBuilder $container
      * @throws \Exception
      */
-    public function load(array $configs, ContainerBuilder $container)
+    public function load(array $configs, ContainerBuilder $container): void
     {
         $this->loadServices($container, __DIR__);
     }
@@ -47,7 +48,7 @@ class Sf4ApiSecurityExtension extends Extension implements PrependExtensionInter
      * Allow an extension to prepend the extension configurations.
      * @param ContainerBuilder $container
      */
-    public function prepend(ContainerBuilder $container)
+    public function prepend(ContainerBuilder $container): void
     {
         $bundles = $container->getParameter('kernel.bundles');
         if (isset($bundles[static::SF4_API_BUNDLE])) {
@@ -61,15 +62,20 @@ class Sf4ApiSecurityExtension extends Extension implements PrependExtensionInter
     /**
      * @return array
      */
-    protected function getRoutes()
+    protected function getRoutes(): array
     {
-        return [];
+        return [
+            [
+                Sf4ApiConfiguration::ROUTES_ROUTE => GoogleLoginRequest::ROUTE,
+                Sf4ApiConfiguration::ROUTES_REQUEST_CLASS => GoogleLoginRequest::class
+            ]
+        ];
     }
 
     /**
      * @return array
      */
-    protected function getEntities()
+    protected function getEntities(): array
     {
         return [
             [

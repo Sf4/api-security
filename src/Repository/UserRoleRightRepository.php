@@ -12,5 +12,5 @@ use Sf4\Api\Repository\AbstractRepository;
 
 class UserRoleRightRepository extends AbstractRepository
 {
-    const TABLE_NAME = 'user_role_right';
+    public const TABLE_NAME = 'user_role_right';
 }

@@ -25,7 +25,8 @@ class UserRight implements EntityInterface, UserRightInterface, TimestampableInt
     ];
 
     public static $anonymousUserRights = [
-        UserRightInterface::RIGHT_API_DEFAULT
+        UserRightInterface::RIGHT_API_DEFAULT,
+        UserRightInterface::RIGHT_API_SECURITY_GOOGLE_LOGIN
     ];
 
     /**

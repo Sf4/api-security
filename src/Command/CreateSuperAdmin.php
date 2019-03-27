@@ -28,7 +28,7 @@ class CreateSuperAdmin extends Command
 
     public function __construct(RepositoryFactory $repositoryFactory)
     {
-        parent::__construct(null);
+        parent::__construct();
         $this->setRepositoryFactory($repositoryFactory);
     }
 
@@ -68,7 +68,7 @@ class CreateSuperAdmin extends Command
      * @param string $email
      * @throws \Exception
      */
-    protected function createUser(string $entityClass, string $detailEntityClass, array $roles, string $email)
+    protected function createUser(string $entityClass, string $detailEntityClass, array $roles, string $email): void
     {
         /** @var User $user */
         $user = new $entityClass();
@@ -92,12 +92,19 @@ class CreateSuperAdmin extends Command
         $this->getRepositoryFactory()->getEntityManager()->flush();
     }
 
-    protected function createUserDetail(string $detailEntityClass, string $firstName, string $lastName)
+    /**
+     * @param string $detailEntityClass
+     * @param string $firstName
+     * @param string $lastName
+     * @return UserDetail
+     */
+    protected function createUserDetail(string $detailEntityClass, string $firstName, string $lastName): UserDetail
     {
         /** @var UserDetail $userDetail */
         $userDetail = new $detailEntityClass();
         $userDetail->setFirstName($firstName);
         $userDetail->setLastName($lastName);
+        $userDetail->setAvatar('');
         $userDetail->createUuid();
 
         return $userDetail;

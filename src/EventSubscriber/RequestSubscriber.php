@@ -26,11 +26,8 @@ class RequestSubscriber implements EventSubscriberInterface
     use UserRightTrait;
     use RepositoryFactoryTrait;
 
-    const REQUEST_ATTRIBUTE = 'token';
-    const CURRENT_USER_CACHE_TIME = 600;
-
-    /** @var RepositoryFactory $repositoryFactory */
-    protected $repositoryFactory;
+    public const REQUEST_ATTRIBUTE = 'token';
+    public const CURRENT_USER_CACHE_TIME = 600;
 
     /**
      * RequestSubscriber constructor.
@@ -44,7 +41,7 @@ class RequestSubscriber implements EventSubscriberInterface
     /**
      * @return array
      */
-    public static function getSubscribedEvents()
+    public static function getSubscribedEvents(): array
     {
         return [
             RequestCreatedEvent::NAME => 'handleRequestCreated'
@@ -56,11 +53,11 @@ class RequestSubscriber implements EventSubscriberInterface
      * @throws \Psr\Cache\CacheException
      * @throws \Psr\Cache\InvalidArgumentException
      */
-    public function handleRequestCreated(RequestCreatedEvent $event)
+    public function handleRequestCreated(RequestCreatedEvent $event): void
     {
         $request = $event->getRequest();
 
-        if (false === $this->isGranted($request)) {
+        if ($request && false === $this->isGranted($request)) {
             $this->setAccessDeniedResponse($event);
         }
     }
@@ -82,7 +79,7 @@ class RequestSubscriber implements EventSubscriberInterface
 
         if ($route && $user) {
             $roles = $user->getRoles();
-            if (in_array(UserRoleInterface::ROLE_SUPER_ADMIN, $roles)) {
+            if (in_array(UserRoleInterface::ROLE_SUPER_ADMIN, $roles, true)) {
                 return true;
             }
 
@@ -101,21 +98,25 @@ class RequestSubscriber implements EventSubscriberInterface
      */
     protected function getAnonymousUser(RequestInterface $request): ?UserInterface
     {
-        return $request->getRequestHandler()->getCacheDataOrAdd(
-            'anonymous_user',
-            function () {
-                /** @var UserRepository $userRepository */
-                $userRepository = $this->getRepositoryFactory()->create(
-                    UserRepository::TABLE_NAME
-                );
+        $requestHandler = $request->getRequestHandler();
+        if ($requestHandler) {
+            return $requestHandler->getCacheDataOrAdd(
+                'anonymous_user',
+                function () {
+                    /** @var UserRepository $userRepository */
+                    $userRepository = $this->getRepositoryFactory()->create(
+                        UserRepository::TABLE_NAME
+                    );
 
-                return $userRepository->getUserByRole(UserRoleInterface::ROLE_ANONYMOUS);
-            },
-            [
-                CacheKeysInterface::TAG_USER
-            ],
-            null
-        );
+                    return $userRepository->getUserByRole(UserRoleInterface::ROLE_ANONYMOUS);
+                },
+                [
+                    CacheKeysInterface::TAG_USER
+                ]
+            );
+        }
+
+        return null;
     }
 
     /**
@@ -127,11 +128,12 @@ class RequestSubscriber implements EventSubscriberInterface
     protected function getCurrentUser(RequestInterface $request): ?UserInterface
     {
         $token = $request->getRequest()->attributes->get(static::REQUEST_ATTRIBUTE);
-        if (!$token) {
+        $requestHandler = $request->getRequestHandler();
+        if (!$token || !$requestHandler) {
             return null;
         }
 
-        return $request->getRequestHandler()->getCacheDataOrAdd(
+        return $requestHandler->getCacheDataOrAdd(
             'user_by_token_' . $token,
             function () use ($token) {
                 /** @var UserRepository $userRepository */
@@ -144,15 +146,14 @@ class RequestSubscriber implements EventSubscriberInterface
             [
                 CacheKeysInterface::TAG_USER,
                 CacheKeysInterface::TAG_USER_DETAIL
-            ],
-            null
+            ]
         );
     }
 
     /**
      * @param RequestCreatedEvent $event
      */
-    protected function setAccessDeniedResponse(RequestCreatedEvent $event)
+    protected function setAccessDeniedResponse(RequestCreatedEvent $event): void
     {
         $request = $event->getRequest();
         $response = new AccessDeniedResponse();
