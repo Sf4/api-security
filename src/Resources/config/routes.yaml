@@ -1,3 +1,7 @@
 sf4_api_security_google_login:
     path: /google-login
-    methods: [GET, OPTIONS]
+    methods: [POST, OPTIONS]
+
+sf4_api_security_google_login_redirect:
+    path: /google-login-redirect
+    methods: [POST, OPTIONS]

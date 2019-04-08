@@ -9,7 +9,9 @@
 namespace Sf4\ApiSecurity\Command;
 
 use Curl\Curl;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Sf4\Api\Dto\Response\SiteResponseDto;
 use Sf4\Api\Repository\RepositoryFactory;
 use Sf4\Api\RequestHandler\RequestHandlerTrait;
@@ -54,7 +56,7 @@ class UserRightCreator extends Command
      * @param InputInterface $input
      * @param OutputInterface $output
      * @return int|void|null
-     * @throws \Exception
+     * @throws Exception
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
@@ -114,7 +116,7 @@ class UserRightCreator extends Command
      * @param array $site
      * @param string $entityClass
      * @param UserInterface $superAdmin
-     * @throws \Exception
+     * @throws Exception
      */
     protected function addSiteRights(array $site, string $entityClass, UserInterface $superAdmin): void
     {
@@ -127,7 +129,7 @@ class UserRightCreator extends Command
             $curl->get($url);
             $response = $curl->getResponse();
             $curl->close();
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             $response = '{}';
         }
 
@@ -149,7 +151,7 @@ class UserRightCreator extends Command
 
     /**
      * @param UserInterface $superAdmin
-     * @throws \Exception
+     * @throws Exception
      */
     protected function addSuperAdminRights(UserInterface $superAdmin): void
     {
@@ -168,7 +170,7 @@ class UserRightCreator extends Command
 
     /**
      * @param UserInterface $user
-     * @throws \Exception
+     * @throws Exception
      */
     protected function addAnonymousUserRights(UserInterface $user): void
     {
@@ -191,7 +193,7 @@ class UserRightCreator extends Command
      * @param string $code
      * @param string $name
      * @param string $site
-     * @throws \Exception
+     * @throws Exception
      */
     protected function addUserRights(
         UserInterface $user,
@@ -246,7 +248,7 @@ class UserRightCreator extends Command
      * @param string $name
      * @param string $site
      * @return UserRole
-     * @throws \Exception
+     * @throws Exception
      */
     protected function createUserRole(
         UserInterface $superAdmin,
@@ -273,7 +275,7 @@ class UserRightCreator extends Command
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     protected function truncateTables(): void
     {
@@ -294,7 +296,7 @@ class UserRightCreator extends Command
      * @param array $rights
      * @param string $entityClass
      * @param UserInterface $superAdmin
-     * @throws \Exception
+     * @throws Exception
      */
     protected function addRights(string $site, array $rights, string $entityClass, UserInterface $superAdmin): void
     {
@@ -318,11 +320,11 @@ class UserRightCreator extends Command
     /**
      * @param TimestampableInterface $entity
      * @param UserInterface $user
-     * @throws \Exception
+     * @throws Exception
      */
     protected function addTimeAndUser(TimestampableInterface $entity, UserInterface $user): void
     {
-        $dateTime = new \DateTime('now');
+        $dateTime = new DateTime('now');
         $entity->setCreatedAt($dateTime);
         $entity->setUpdatedAt($dateTime);
         $entity->setCreatedBy($user);

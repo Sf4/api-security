@@ -8,6 +8,7 @@
 
 namespace Sf4\ApiSecurity\Routing;
 
+use Exception;
 use Symfony\Component\Config\Loader\Loader;
 use Symfony\Component\Routing\RouteCollection;
 
@@ -26,7 +27,7 @@ class ApiSecurityLoader extends Loader
      * @param string|null $type The resource type or null if unknown
      *
      * @return RouteCollection|null
-     * @throws \Exception If something went wrong
+     * @throws Exception If something went wrong
      */
     public function load($resource, $type = null): ?RouteCollection
     {

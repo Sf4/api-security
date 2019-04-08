@@ -8,7 +8,11 @@
 
 namespace Sf4\ApiSecurity\Request;
 
+use Closure;
+use Psr\Cache\CacheException;
+use Psr\Cache\InvalidArgumentException;
 use Sf4\Api\Request\AbstractRequest;
+use Sf4\ApiSecurity\Dto\Request\GoogleLoginRequestDto;
 use Sf4\ApiSecurity\Response\GoogleLoginResponse;
 use Sf4\ApiUser\CacheAdapter\CacheKeysInterface;
 
@@ -19,20 +23,21 @@ class GoogleLoginRequest extends AbstractRequest
     public function __construct()
     {
         $this->init(
-            new GoogleLoginResponse()
+            new GoogleLoginResponse(),
+            new GoogleLoginRequestDto()
         );
     }
 
     /**
-     * @param \Closure $closure
+     * @param Closure $closure
      * @param string|null $cacheKey
      * @param array $tags
      * @param int|null $expiresAfter
-     * @throws \Psr\Cache\CacheException
-     * @throws \Psr\Cache\InvalidArgumentException
+     * @throws CacheException
+     * @throws InvalidArgumentException
      */
     public function getCachedResponse(
-        \Closure $closure,
+        Closure $closure,
         string $cacheKey = null,
         array $tags = [],
         int $expiresAfter = null

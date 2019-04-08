@@ -8,6 +8,7 @@
 
 namespace Sf4\ApiSecurity\DependencyInjection;
 
+use Exception;
 use Sf4\ApiSecurity\Request\GoogleLoginRequest;
 use Sf4\ApiUser\Entity\User;
 use Sf4\ApiUser\Entity\UserDetail;
@@ -37,7 +38,7 @@ class Sf4ApiSecurityExtension extends Extension implements PrependExtensionInter
      *
      * @param array $configs
      * @param ContainerBuilder $container
-     * @throws \Exception
+     * @throws Exception
      */
     public function load(array $configs, ContainerBuilder $container): void
     {

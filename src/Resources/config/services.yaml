@@ -1,3 +1,6 @@
+parameters:
+    google_app_name: '%env(resolve:GOOGLE_APP_NAME)%'
+    google_client_id: '%env(resolve:GOOGLE_CLIENT_ID)%'
 services:
     Sf4\ApiSecurity\EventSubscriber\RequestSubscriber:
         class: Sf4\ApiSecurity\EventSubscriber\RequestSubscriber

@@ -8,6 +8,8 @@
 
 namespace Sf4\ApiSecurity\Command;
 
+use DateTime;
+use Exception;
 use Sf4\Api\Repository\RepositoryFactory;
 use Sf4\Api\RequestHandler\Traits\RepositoryFactoryTrait;
 use Sf4\Api\Setting\StatusSettingInterface;
@@ -36,7 +38,7 @@ class CreateSuperAdmin extends Command
      * @param InputInterface $input
      * @param OutputInterface $output
      * @return int|void|null
-     * @throws \Exception
+     * @throws Exception
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
@@ -66,7 +68,7 @@ class CreateSuperAdmin extends Command
      * @param string $detailEntityClass
      * @param array $roles
      * @param string $email
-     * @throws \Exception
+     * @throws Exception
      */
     protected function createUser(string $entityClass, string $detailEntityClass, array $roles, string $email): void
     {
@@ -77,8 +79,8 @@ class CreateSuperAdmin extends Command
         $user->setStatus(StatusSettingInterface::ACTIVE);
         $user->setRoles($roles);
         $user->setEmail($email);
-        $user->setCreatedAt(new \DateTime());
-        $user->setUpdatedAt(new \DateTime());
+        $user->setCreatedAt(new DateTime());
+        $user->setUpdatedAt(new DateTime());
         $user->setUserDetail(
             $this->createUserDetail(
                 $detailEntityClass,

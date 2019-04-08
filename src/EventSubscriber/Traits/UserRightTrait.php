@@ -8,6 +8,8 @@
 
 namespace Sf4\ApiSecurity\EventSubscriber\Traits;
 
+use Psr\Cache\CacheException;
+use Psr\Cache\InvalidArgumentException;
 use Sf4\Api\Repository\RepositoryFactory;
 use Sf4\Api\Request\RequestInterface;
 use Sf4\ApiSecurity\Repository\UserRightRepository;
@@ -34,14 +36,14 @@ trait UserRightTrait
         return false;
     }
 
-    abstract public function getRepositoryFactory(): ?RepositoryFactory;
+    abstract public function getRepositoryFactory(): RepositoryFactory;
 
     /**
      * @param UserInterface $user
      * @param RequestInterface $request
      * @return array
-     * @throws \Psr\Cache\CacheException
-     * @throws \Psr\Cache\InvalidArgumentException
+     * @throws CacheException
+     * @throws InvalidArgumentException
      */
     protected function getUserRightCodes(UserInterface $user, RequestInterface $request): array
     {

@@ -9,6 +9,7 @@
 namespace Sf4\ApiSecurity\Dto\Response;
 
 use Sf4\Api\Dto\Response\AbstractResponseDto;
+use Sf4\ApiUser\Dto\Response\DetailDto;
 
 class GoogleLoginResponseDto extends AbstractResponseDto
 {
@@ -23,6 +24,14 @@ class GoogleLoginResponseDto extends AbstractResponseDto
 
     /** @var string|null $image */
     protected $image;
+
+    /** @var DetailDto|null $user */
+    protected $user;
+
+    public function toArray(): array
+    {
+        return $this->objectToArray($this, []);
+    }
 
     /**
      * @return string|null
@@ -86,5 +95,21 @@ class GoogleLoginResponseDto extends AbstractResponseDto
     public function setImage(?string $image): void
     {
         $this->image = $image;
+    }
+
+    /**
+     * @return DetailDto|null
+     */
+    public function getUser(): ?DetailDto
+    {
+        return $this->user;
+    }
+
+    /**
+     * @param DetailDto|null $user
+     */
+    public function setUser(?DetailDto $user): void
+    {
+        $this->user = $user;
     }
 }

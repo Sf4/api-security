@@ -8,6 +8,8 @@
 
 namespace Sf4\ApiSecurity\EventSubscriber;
 
+use Psr\Cache\CacheException;
+use Psr\Cache\InvalidArgumentException;
 use Sf4\Api\Repository\RepositoryFactory;
 use Sf4\Api\Request\RequestInterface;
 use Sf4\Api\RequestHandler\Traits\RepositoryFactoryTrait;
@@ -50,8 +52,8 @@ class RequestSubscriber implements EventSubscriberInterface
 
     /**
      * @param RequestCreatedEvent $event
-     * @throws \Psr\Cache\CacheException
-     * @throws \Psr\Cache\InvalidArgumentException
+     * @throws CacheException
+     * @throws InvalidArgumentException
      */
     public function handleRequestCreated(RequestCreatedEvent $event): void
     {
@@ -65,8 +67,8 @@ class RequestSubscriber implements EventSubscriberInterface
     /**
      * @param RequestInterface $request
      * @return bool
-     * @throws \Psr\Cache\CacheException
-     * @throws \Psr\Cache\InvalidArgumentException
+     * @throws CacheException
+     * @throws InvalidArgumentException
      */
     protected function isGranted(RequestInterface $request): bool
     {
@@ -93,8 +95,8 @@ class RequestSubscriber implements EventSubscriberInterface
     /**
      * @param RequestInterface $request
      * @return UserInterface|null
-     * @throws \Psr\Cache\CacheException
-     * @throws \Psr\Cache\InvalidArgumentException
+     * @throws CacheException
+     * @throws InvalidArgumentException
      */
     protected function getAnonymousUser(RequestInterface $request): ?UserInterface
     {
@@ -122,8 +124,8 @@ class RequestSubscriber implements EventSubscriberInterface
     /**
      * @param RequestInterface $request
      * @return UserInterface|null
-     * @throws \Psr\Cache\CacheException
-     * @throws \Psr\Cache\InvalidArgumentException
+     * @throws CacheException
+     * @throws InvalidArgumentException
      */
     protected function getCurrentUser(RequestInterface $request): ?UserInterface
     {
